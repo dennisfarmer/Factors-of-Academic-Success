@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Read survey spreadsheets
-filepath = "C:/Users/Dennis/Documents/Factors of Academic Success/"
+#filepath = "C:/Users/Dennis/Documents/Factors of Academic Success/"
+filepath = "C:/Users/Dennis/Documents/Git/Factors of Academic Success/Survey Spreadsheets/"
 
 survey101 = pd.read_excel(filepath + "Factors of Academic Success Survey (1.01).xlsx")
 
@@ -34,7 +35,7 @@ def time_to_datetime(column, dataf=surveydata):
     time_dt = []
     # Insert Date
     for i in range(dataf.shape[0]):
-        if column == "UP_FROM_BED" or (column == "GO_TO_BED" and (0 <= dataf[column][i].hour < 5)): # Special for timedelta where one column can have more than one possible day
+        if column == "UP_FROM_BED" or (column == "GO_TO_BED" and dataf[column][i].hour < 5): # Special for timedelta where one column can have more than one possible day
             time_day.append("2000/01/02 ")
         else:
             time_day.append("2000/01/01 ")
@@ -63,11 +64,31 @@ surveydata["AVG_SLEEP_HOURS"] = surveydata["AVG_SLEEP_HOURS"].apply(lambda x: x.
 surveydata.loc[surveydata["MAJOR"].str.contains(r"music", case=False, na=False, regex=True), "MAJOR"] = "Music"
 #surveydata[musicselect]["MAJOR"] = "Music" # <-- Raises SettingWithCopyWarning
 
+### Compare SAT and ACT scores and keep the highest one as a converted SAT score
 
+
+
+### (Big brain project) Use Classes and shit to convert Big5 personality dimensions to Myers Briggs personalities
+#https://www.reddit.com/r/mbti/comments/6ubauu/big_five_and_mbti_correlationstheory/
+#https://personalityjunkie.com/09/openness-myers-briggs-mbti-intuition-big-five-iq-correlations/
+
+surveydata_personalities = surveydata[["TIMESTAMP", "MYERS_BRIGGS", "OPENNESS", "CONSCIENTIOUSNESS", "EXTRAVERSION", "AGREEABLENESS", "NEUROTICISM"]]
+
+#number of clubs could lead to better grades
+#what percentage of band nerds are religeous?
+
+
+
+####################
+# Data Exploration #
+####################
+
+
+#surveydata.to_excel("SurveyData")
 
 
     
-#print(surveydata["AVG_SLEEP"].mean())
+#fig, axes = plt.subplots()
 
 
 
