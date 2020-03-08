@@ -18,10 +18,12 @@ survey202 = pd.read_excel(filepath + "Factors of Academic Success Survey (2.02).
 
 # Merge dataframes
 surveydata = pd.merge(left=survey101, right=survey202, how="outer")
+#surveydata = surveydata.rename(columns = lambda x: x.lower())
 surveydata.columns = map(str.lower, surveydata.columns)
 
+
 # Drop columns that I've decided to not use in analysis
-surveydata = surveydata.drop(['hobby', 'tv_laugh_track', 'perfectionist', 'large_ego', 'good_at_comedy'], axis=1)
+surveydata = surveydata.drop(['hobby', 'tv_laugh_track', 'perfectionist', 'large_ego', 'good_at_comedy', 'chosen_music_artists'], axis=1)
 
 ##########################################
 # Basic data cleaning and transformation #
@@ -29,7 +31,7 @@ surveydata = surveydata.drop(['hobby', 'tv_laugh_track', 'perfectionist', 'large
 
 # Convert list cells to lists
 select_columns = ['self_improv', 'activities', 'watched_media', 'chosen_music_artists']
-surveydata[select_columns]= surveydata[select_columns].apply(lambda x: x.str.split(","))
+surveydata[select_columns] = surveydata[select_columns].apply(lambda x: x.str.split(","))
     
 ### Calculate the average amount of sleep for each person
 def time_to_datetime(column, dataf=surveydata):
@@ -96,6 +98,60 @@ big5_rows = surveydata.iloc[:35][select_columns].applymap(clean_big5)
 surveydata.iloc[:35][select_columns] = big5_rows
 
 
+### Create unique columns for elements in list columns
+def expand_series_of_lists(in_series):
+    """
+    Turns a series of multiple answer responses into a boolean dataframe
+    """
+    # I don't understand list comprehensions yet so just 
+    # check out these garbage nested for loops hahaha
+    
+    element_list = list(in_series)
+    unique_elements = []
+
+    # Create a list of unique values throughout all cells in column
+    for row in element_list:
+        try:
+            for element in row:
+                element = element.strip().lower().replace(' ', '_')
+                if element not in unique_elements:
+                    unique_elements.append(element)
+        except TypeError:
+            pass
+                
+    def create_bool_series(cell, unique):
+        try:
+            for element in cell:
+                if unique == element.strip().lower().replace(' ', '_'):
+                    return True
+        except TypeError:
+            pass
+        return False
+        
+    out_dataf = pd.DataFrame()
+    for u_element in unique_elements:
+        out_dataf.insert(0, u_element, in_series.apply(lambda x: create_bool_series(x, unique=u_element)))
+        
+    # reverse order of columns, not really required
+    out_dataf = out_dataf[out_dataf.columns.tolist()[::-1]]             
+    return out_dataf
+
+for column in ['self_improv', 'activities', 'watched_media']:
+    surveydata = pd.concat([surveydata, expand_series_of_lists(surveydata[column])], axis=1)
+
+surveydata = surveydata.drop(['self_improv', 'activities', 'watched_media', 'chosen_music_artists'], axis=1)
+
+# rename column names to make data exploration less tedious
+#colnames = surveydata.columns.tolist()
+
+#################
+columns_to_rename = {'i_have_a_consistent_morning_routine':'morning_routine', 'i_exercise_on_a_regular_basis':'exercise', 'i_try_to_maintain_a_healthy_diet':'healthy_diet', 'i_try_to_limit_my_use_of_social_media':'limit_social_media', 'i_participate_in_nofap':'nofap', 'i_keep_a_journal_for_things_like_time_management_|_personal_development/goals_|_and_idea/project_notes':'has_planner1', "i_keep_a_diary_for_things_like_analyzing_the_day's_activities_|_tracking_mental_health_|_and_self_reflection.":'has_diary1','i_drink_energy_drinks_on_a_semi-regular_basis':'energy_drinks1', 'i_practice_meditation':'meditation', 'i_take_cold_showers':'cold_showers', 'i_keep_a_planner_for_things_like_time_management_|_personal_development/goals_|_and_idea/project_notes':'has_planner2', "i_keep_a_journal/diary_for_things_like_analyzing_the_day's_activities_|_tracking_mental_health_|_and_self_reflection.":'has_diary2', 'i_drink_coffee_on_a_semi-regular_basis?':'coffee2', 'i_drink_coffee_on_a_semi-regular_basis':'coffee1', 'gaming_/_mtg_/_dnd_group':'in_gaming_club', 'drum_corps':'drum_corps1', 'physical_sport_(hockey_|_soccer_|_etc.)':'physical_sport','theater_/_drama_club':'theater','nature_hobby_(fishing_|_camping_|_etc.)':'nature_hobby','school_band_(concert_|_jazz_|_marching)':'school_band','indoor_drumline':'indoor_drumline1','stem_club_(robotics_|_it_|_etc)':'stem_club','indoor_drumline_/_wgi':'indoor_drumline2','drum_corps_/_dci':'drum_corps2'}
+#################
+
+surveydata = surveydata.rename(columns=columns_to_rename)
+surveydata = surveydata.drop(['nofap', 'theater'], axis=1)
+
+### create web app that allows users to select statistics to calculate
 
 #avg_sleep_per_grade = surveydata.pivot_table(values='avg_sleep_hours', index='school_year', aggfunc= np.mean)
      
