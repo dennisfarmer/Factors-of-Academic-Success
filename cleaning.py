@@ -265,5 +265,5 @@ os.chdir("../Cleaned Survey Results")
 surveydata.set_index("timestamp", inplace=True)
 
 surveydata.to_csv("surveydata.csv")
-surveydata.to_json("surveydata.json", orient="records")
+surveydata.to_json("surveydata.json", orient="records", lines=True)
 surveydata.to_excel("surveydata.xlsx")
