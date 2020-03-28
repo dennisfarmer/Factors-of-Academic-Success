@@ -233,7 +233,8 @@ surveydata = surveydata.drop(['nofap','theater','gaming_club','stem_club','diary
 
 
 ### Set missing values from datasets to NaN (instead of False)
-surveydata.loc[surveydata["survey_loc"] == "Implying Dum corps: electric boogaloo", "coffee"] = pd.NA
+# Find out why coffe datatype isn't boolean after following line:
+surveydata.loc[surveydata["survey_loc"] == "Implying Dum corps: electric boogaloo", "coffee"] = np.NaN
 
 
 ### Convert first 36 big5 personality score rows to range 1-5 (from range 1-10)
@@ -265,5 +266,5 @@ os.chdir("../Cleaned Survey Results")
 surveydata.set_index("timestamp", inplace=True)
 
 surveydata.to_csv("surveydata.csv")
-surveydata.to_json("surveydata.json", orient="records", lines=True)
+surveydata.to_json("surveydata.json", orient="records", lines=True, indent=4)
 surveydata.to_excel("surveydata.xlsx")
