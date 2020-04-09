@@ -254,17 +254,18 @@ surveydata.iloc[0:36][columns] = surveydata.iloc[0:36][columns].applymap(clean_b
 
 
 
-##################################################
-### Export data to csv, json and excel formats ###
-##################################################
+###################################################
+### Export data to json, excel, and csv formats ###
+###################################################
 
-if not os.path.exists("../Cleaned Survey Results"):
-    os.mkdir("../Cleaned Survey Results")
+if not os.path.exists("../Cleaned JSON and XLSX"):
+    os.mkdir("../Cleaned JSON and XLSX")
     
-os.chdir("../Cleaned Survey Results")
+os.chdir("../Cleaned JSON and XLSX")
 
 surveydata.set_index("timestamp", inplace=True)
 
-surveydata.to_csv("surveydata.csv")
 surveydata.to_json("surveydata.json", orient="records", lines=True, indent=4)
 surveydata.to_excel("surveydata.xlsx")
+os.chdir("../")
+surveydata.to_csv("surveydata.csv")
