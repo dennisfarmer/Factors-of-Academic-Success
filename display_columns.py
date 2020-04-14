@@ -6,7 +6,7 @@ Created on Sun Apr 12 10:38:39 2020
 """
 import pandas
 
-def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int", drop_index:"bool"=True)-> "None":
+def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int", drop_index:"bool"=True, output:"str"="html")-> "None or pandas.DataFrame":
     """Display a single Dataframe across multiple columns in a Jupiter Notebook.
     
     Parameters
@@ -18,10 +18,15 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
             
         drop_index : bool, default True
             Determines whether to reset the original index. By default, the index is reset to integer values.
+            
+        output : {'html', 'dataframe'}, default 'html'
+            The kind of object to return
+            - 'html' displays an HTML table inline, with no return value
+            - 'dataframe' returns a pandas.DataFrame object
         
     Returns
     -------
-        None
+        None or pandas.DataFrame
     
     """
     import numpy as np
@@ -49,20 +54,63 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
     r[-1] = df.shape[0] - 1
     
     if drop_index:
-        df.reset_index(drop=True, inplace=True)
+        df.reset_index(drop = True, inplace=True)
+    else:
+        df.reset_index(level=0, inplace=True)
     
     if isinstance(df, pandas.Series):
         df = df.to_frame()
     
     # Create list of DataFrames, where each DataFrame is a slice of the original DataFrame
-    split_dataframe = [df[r[i]:r[i+1]+1] if i == display_columns-1 else df[r[i]:r[i+1]] for i in range(len(r)-1)]
+    num_rows = []
+    split_dataframe = []
+    for i in range(len(r)-1):
+        if i == display_columns-1:
+            d = df[r[i]:r[i+1]+1]
+            num_rows.append(d.shape[0])
+            split_dataframe.append(d)
+        else:
+            d = df[r[i]:r[i+1]]
+            num_rows.append(d.shape[0])
+            split_dataframe.append(d)
+            
+    print("num_rows:", num_rows)
+    print(max(num_rows))
     
-    strHtml = ''
-    for x in split_dataframe:
-        strHtml += x.to_html()
-    display_html(strHtml.replace('table','table style="display:inline"'), raw=True)
-
-
+    max_rows = max(num_rows)
+    
+    if output == "dataframe":
+        
+        
+        alldata = [i.values.tolist() for i in split_dataframe]
+        
+        for i in range(len(alldata)):
+            while len(alldata[i]) < max_rows:  ## <-- currently where i'm at, making all dataf's have same num of rows
+                alldata[i].append([[""]*df.shape[1]])
+        
+        
+        endyboi = []
+        print("dfvals[0]: ",df.values[0])
+        for col_i in range(max(num_rows)-1):
+            print("this-a-col")
+            acc_row = []
+            for dataf in alldata:
+                print("this-a-df")
+                acc_row.extend(dataf[col_i])
+            print("this-acc_row\n", acc_row, "\n")
+            endyboi.extend([acc_row])
+            
+        
+        print("this-endy_boi\n", endyboi)
+        return pandas.DataFrame(data=endyboi)
+    
+    if output == "html":
+        strHtml = ''
+        for x in split_dataframe:
+            strHtml += x.to_html()
+        display_html(strHtml.replace('table','table style="display:inline"'), raw=True)
+        
+        
 
 def display_side_by_side(*args:"pandas.DataFrame, pandas.Series", drop_index:"bool"=False)-> "None":
     """Display multiple DataFrames side-by-side in a Jupiter Notebook.
