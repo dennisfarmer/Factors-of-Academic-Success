@@ -214,7 +214,7 @@ columns = ["social_awkward", "social_anxious", "show_up_early", "cluttered", "sh
 for column in columns:
     surveydata[column] = surveydata[column].map({"Yes":True, "No":False})
 
-
+surveydata.depressed = surveydata.depressed.astype(float)
 
 ### Combine duplicate columns (coffee = coffee2, etc)
 # Duplicate columns have been differentiated by appending "2"
@@ -233,9 +233,7 @@ surveydata = surveydata.drop(['nofap','theater','gaming_club','stem_club','diary
 
 
 ### Set missing values from datasets to NaN (instead of False)
-# Find out why coffe datatype isn't boolean after following line:
 surveydata.loc[surveydata["survey_loc"] == "Implying Dum corps: electric boogaloo", "coffee"] = np.NaN
-
 
 ### Convert first 36 big5 personality score rows to range 1-5 (from range 1-10)
 def clean_big5(score):
@@ -251,8 +249,12 @@ def clean_big5(score):
 
 columns = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism']
 surveydata.iloc[0:36][columns] = surveydata.iloc[0:36][columns].applymap(clean_big5).copy()
+surveydata.conscientiousness = surveydata.conscientiousness.astype(float)
 
-
+### Change datatypes from bool, int to float (dummy variables and consistency)
+for column in surveydata:
+    if str(surveydata[column].dtype) in ['bool', 'int64']:
+        surveydata[column] = surveydata[column].astype(float)
 
 ###################################################
 ### Export data to json, excel, and csv formats ###

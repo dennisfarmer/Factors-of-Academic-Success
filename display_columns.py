@@ -35,6 +35,9 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
     if display_columns < 2:
         raise IndexError('Number of desired columns must exceed 1')
     
+    
+    ### After fixing below, find out how to keep column names when dropindex=True
+    
     #if display_columns == df.shape[0]//display_columns:
         #raise ValueError('Number of rows cannot equal display_columns**2 for mathematical wizardry reasons') <-- not actually because of squared number
     
@@ -65,6 +68,7 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
     num_rows = []
     split_dataframe = []
     for i in range(len(r)-1):
+        
         if i == display_columns-1:
             d = df[r[i]:r[i+1]+1]
             num_rows.append(d.shape[0])
@@ -73,36 +77,26 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
             d = df[r[i]:r[i+1]]
             num_rows.append(d.shape[0])
             split_dataframe.append(d)
-            
-    print("num_rows:", num_rows)
-    print(max(num_rows))
-    
-    max_rows = max(num_rows)
     
     if output == "dataframe":
         
-        
         alldata = [i.values.tolist() for i in split_dataframe]
         
+        # Add empty rows to each DataFrame until all DataFrames have the same number of rows
         for i in range(len(alldata)):
-            while len(alldata[i]) < max_rows:  ## <-- currently where i'm at, making all dataf's have same num of rows
-                alldata[i].append([[""]*df.shape[1]])
-        
-        
-        endyboi = []
-        print("dfvals[0]: ",df.values[0])
-        for col_i in range(max(num_rows)-1):
-            print("this-a-col")
-            acc_row = []
+            while len(alldata[i]) < max(num_rows):
+                alldata[i].append(["-"]*df.shape[1])
+
+        # Create rows of values across all of the DataFrames in alldata
+        # When each entire row is created, add it to the output DataFrame
+        dataframe = [] # <-- Output DataFrame
+        for row_index in range(max(num_rows)):
+            across_row = []
             for dataf in alldata:
-                print("this-a-df")
-                acc_row.extend(dataf[col_i])
-            print("this-acc_row\n", acc_row, "\n")
-            endyboi.extend([acc_row])
+                across_row.extend(dataf[row_index])
+            dataframe.extend([across_row])
             
-        
-        print("this-endy_boi\n", endyboi)
-        return pandas.DataFrame(data=endyboi)
+        return pandas.DataFrame(data=dataframe)
     
     if output == "html":
         strHtml = ''
