@@ -6,23 +6,23 @@ Created on Sun Apr 12 10:38:39 2020
 """
 import pandas
 
-def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int", drop_index:"bool"=True, output:"str"="html")-> "None or pandas.DataFrame":
+def split_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"=5, drop_index:"bool"=True, output:"str"="dataframe")-> "None or pandas.DataFrame":
     """Display a single Dataframe across multiple columns in a Jupiter Notebook.
     
     Parameters
     ----------
         df : pandas.Dataframe, pandas.Series
         
-        display_columns : int
+        display_columns : int, default 5
             Number of columns to display.
             
         drop_index : bool, default True
             Determines whether to reset the original index. By default, the index is reset to integer values.
             
-        output : {'html', 'dataframe'}, default 'html'
+        output : {'dataframe', 'html'}, default 'dataframe'
             The kind of object to return
-            - 'html' displays an HTML table inline, with no return value
             - 'dataframe' returns a pandas.DataFrame object
+            - 'html' displays an HTML table inline, with no return value
         
     Returns
     -------
@@ -37,6 +37,10 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
     
     
     ### After fixing below, find out how to keep column names when dropindex=True
+    ### if series, dont allow drop index?
+    
+    ### allow passing in of desired column names as an array of strings (will result
+    ### in dup col names but it won't matter if its only being displayed and not used in calculations)
     
     #if display_columns == df.shape[0]//display_columns:
         #raise ValueError('Number of rows cannot equal display_columns**2 for mathematical wizardry reasons') <-- not actually because of squared number
@@ -60,28 +64,28 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
     
     
     
-    
+    print("DEBUGGING TEXT:")
     
     #  len(r)-1 should be equal to display_columns
-    
     # Create range of indexes to divide DataFrame into multiple columns
     rround = np.arange(0,df.shape[0],round(df.shape[0]/display_columns))
     rfloor = np.arange(0,df.shape[0],df.shape[0]//display_columns)
     
-    print(len(rround), rround, '\n', len(rfloor), rfloor, sep='')
+    print(len(rround), rround, '      (round before conversion)','\n', len(rfloor),rfloor, '      (floor before conversion)',sep='')
     
-    r=rround
     # Add remainder rows to last column
-    if r[-1] != df.shape[0]-1:
-        r = np.append(r,[df.shape[0]-1])
+    if rround[-1] != df.shape[0]-1:
+        rround = np.append(rround,[df.shape[0]-1])
     
-    #r[-1] = df.shape[0] - 1
-    print(len(r),r, '      (round after conversion)', sep='')
     if rfloor[-1] != df.shape[0]-1:
         rfloor = np.append(rfloor,[df.shape[0]-1])
-    print(len(rfloor),rfloor, '      (floor after conversion)', sep='')
+    
+    #r[-1] = df.shape[0] - 1
+    
+    print(len(rround),rround,'      (round after conversion)','\n', len(rfloor),rfloor,'      (floor after conversion)',sep='')
     
     
+    r=rround     
         
         
         
@@ -91,16 +95,14 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
         
         
         
-        
-        
+    if isinstance(df, pandas.Series):
+        df = df.to_frame()
         
     if drop_index:
         df.reset_index(drop = True, inplace=True)
     else:
         df.reset_index(level=0, inplace=True)
     
-    if isinstance(df, pandas.Series):
-        df = df.to_frame()
 
     # Create list of DataFrames, where each DataFrame is a slice of the original DataFrame
     num_rows = []
@@ -123,7 +125,7 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
         # Add empty rows to each DataFrame until all DataFrames have the same number of rows
         for i in range(len(alldata)):
             while len(alldata[i]) < max(num_rows):
-                alldata[i].append(["-"]*df.shape[1])
+                alldata[i].append([""]*df.shape[1])
 
         # Create rows of values across all of the DataFrames in alldata
         # When each entire row is created, add it to the output DataFrame
