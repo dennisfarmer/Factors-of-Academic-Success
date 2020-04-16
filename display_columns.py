@@ -51,11 +51,49 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
         # (eventually I'll come back to this to figure out why)
         # (the likely solution is just to stick '+1' and '-1' everywhere lol)
     
-    # Create range of indexes to divide DataFrame into multiple columns
-    r = np.arange(0,df.shape[0],df.shape[0]//display_columns)
-    # Add remainder rows to last column
-    r[-1] = df.shape[0] - 1
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    #  len(r)-1 should be equal to display_columns
+    
+    # Create range of indexes to divide DataFrame into multiple columns
+    rround = np.arange(0,df.shape[0],round(df.shape[0]/display_columns))
+    rfloor = np.arange(0,df.shape[0],df.shape[0]//display_columns)
+    
+    print(len(rround), rround, '\n', len(rfloor), rfloor, sep='')
+    
+    r=rround
+    # Add remainder rows to last column
+    if r[-1] != df.shape[0]-1:
+        r = np.append(r,[df.shape[0]-1])
+    
+    #r[-1] = df.shape[0] - 1
+    print(len(r),r, '      (round after conversion)', sep='')
+    if rfloor[-1] != df.shape[0]-1:
+        rfloor = np.append(rfloor,[df.shape[0]-1])
+    print(len(rfloor),rfloor, '      (floor after conversion)', sep='')
+    
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     if drop_index:
         df.reset_index(drop = True, inplace=True)
     else:
@@ -63,13 +101,13 @@ def divide_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"
     
     if isinstance(df, pandas.Series):
         df = df.to_frame()
-    
+
     # Create list of DataFrames, where each DataFrame is a slice of the original DataFrame
     num_rows = []
     split_dataframe = []
-    for i in range(len(r)-1):
+    for i in np.arange(len(r)-1): #probs just use range
         
-        if i == display_columns-1:
+        if i == np.arange(len(r)-1)[-1]: # display_columns-1
             d = df[r[i]:r[i+1]+1]
             num_rows.append(d.shape[0])
             split_dataframe.append(d)
