@@ -62,7 +62,7 @@ def export_data(df, path:'path/to/folder_name'='.', fname='data', ftype=['.json'
         out_names.append(f"{fname}.csv")
         
     if not mute_output:
-        print(f'The following file{"s have" if len(out_names) > 1 else " has"} been saved to {os.getcwd()}/*\n', str(out_names).replace("'",""), '\n')
+        print(f'The following file{"s have" if len(out_names) > 1 else " has"} been saved to {os.getcwd()}/*\n', str(out_names).replace("'","").replace("[","").replace("]",""), '\n', sep="")
     os.chdir(root_dir)
     
 
@@ -280,7 +280,7 @@ if __name__ == '__main__':
         surveydata = surveydata.drop([column + "2"], axis=1)
 
     # Drop data points that I've decided to not use in analysis
-    surveydata = surveydata.drop(['hobby', 'tv_laugh_track', 'perfectionist', 'large_ego', 'good_at_comedy', 'chosen_music_artists'], axis=1)
+    surveydata = surveydata.drop(['hobby', 'tv_laugh_track', 'perfectionist', 'large_ego', 'good_at_comedy'], axis=1)
 
     ### Drop data points that are either rare or likely irrelevent (>50 columns is going to be impractical to work with)
 
