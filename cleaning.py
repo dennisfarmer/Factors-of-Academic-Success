@@ -62,7 +62,7 @@ def export_data(df, path:'path/to/folder_name'='.', fname='data', ftype=['.json'
         out_names.append(f"{fname}.csv")
         
     if not mute_output:
-        print(f'The following file{"s have" if len(out_names) > 1 else " has"} been saved to {os.getcwd()}/*\n', str(out_names).replace("'","").replace("[","").replace("]",""), '\n', sep="")
+        print(f'''The following file{"s have" if len(out_names) > 1 else " has"} been saved to "{os.getcwd()}"\n''', str(out_names).replace("'","").replace("[","").replace("]",""), '\n', sep="")
     os.chdir(root_dir)
     
 
@@ -87,7 +87,17 @@ def act_to_sat(act):
         else:
             return np.nan
         
-        
+### Combine two like boolean columns by comparing across the x axis with df.any()
+def combine_duplicate_columns(df, column_names, suffix):
+    dataframe = df.copy()
+    for column in column_names:
+        try:
+            dataframe[column] = dataframe[[column, column+suffix]].any(axis=1)
+            dataframe = dataframe.drop([column+suffix], axis=1)
+        except KeyError:
+            continue
+    return dataframe
+
 ### Create unique columns for elements in list columns
 def make_dummies(series, astype=float):
     """
@@ -274,10 +284,7 @@ if __name__ == '__main__':
     surveydata.depressed = surveydata.depressed.astype(float)
 
     ### Combine duplicate columns (coffee = coffee2, etc)
-    # Duplicate columns have been differentiated by appending "2"
-    for column in ["coffee", "drum_corps", "indoor_drumline", "planner", "diary"]:
-        surveydata[column] = surveydata[[column, column + "2"]].any(axis=1)
-        surveydata = surveydata.drop([column + "2"], axis=1)
+    surveydata = combine_duplicate_columns(surveydata, column_names=["coffee", "drum_corps", "indoor_drumline", "planner", "diary"], suffix="2")
 
     # Drop data points that I've decided to not use in analysis
     surveydata = surveydata.drop(['hobby', 'tv_laugh_track', 'perfectionist', 'large_ego', 'good_at_comedy'], axis=1)
