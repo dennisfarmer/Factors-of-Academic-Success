@@ -338,8 +338,7 @@ if __name__ == '__main__':
         if str(surveydata[column].dtype) in ['bool', 'int64']:
             surveydata[column] = surveydata[column].astype(float)
             
-    ###################################################
-    ### Export data to json, excel, and csv formats ###
-    ###################################################
-    export_data(surveydata, path="Cleaned JSON and XLSX", fname='surveydata', ftype=['.json','.xlsx'], set_index='timestamp')
+    ##################################
+    ### Export data to .csv format ###
+    ##################################
     export_data(surveydata, fname='surveydata', ftype='.csv', set_index='timestamp')
