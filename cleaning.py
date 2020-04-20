@@ -29,7 +29,8 @@ def load_datas(path:'path/to/folder_name'='.', ftype='excel'):
                 dataframe = pd.merge(left=dataframe, right=read_data(f), how="outer")
             else:
                 raise OSError(f'All files in given directory must be of type "{extension}"')
-
+        break # os.walk must be iterated in order to access files but we only want the current directory of files. Adding break prevents accessing unintended subfolders.
+        
     dataframe.columns = map(str.lower, dataframe.columns)
     os.chdir(root_dir)
     return dataframe
