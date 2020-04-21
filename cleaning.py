@@ -29,7 +29,7 @@ def load_datas(path:'path/to/folder_name'='.', ftype='excel'):
                 dataframe = pd.merge(left=dataframe, right=read_data(f), how="outer")
             else:
                 raise OSError(f'All files in given directory must be of type "{extension}"')
-        break # os.walk must be iterated in order to access files but we only want the current directory of files. Adding break prevents accessing unintended subfolders.
+        break
         
     dataframe.columns = map(str.lower, dataframe.columns)
     os.chdir(root_dir)
@@ -90,6 +90,7 @@ def act_to_sat(act):
         
 ### Combine two like boolean columns by comparing across the x axis with df.any()
 def combine_duplicate_columns(df, column_names, suffix):
+    import pandas as pd
     dataframe = df.copy()
     for column in column_names:
         try:
@@ -98,6 +99,16 @@ def combine_duplicate_columns(df, column_names, suffix):
         except KeyError:
             continue
     return dataframe
+
+
+def get_avg_i_scores(dataframe, dummy, i_col='i_score'):
+    import pandas as pd
+    dummy = dummy.astype(bool)
+    avg_scores = {}
+    for col in dummy.columns:
+        avg_scores[col] = dataframe.loc[dummy[col],i_col].sum() / dummy[col].sum()
+    return pd.Series(avg_scores)
+
 
 ### Create unique columns for elements in list columns
 def make_dummies(series, astype=float):
@@ -135,7 +146,38 @@ def make_dummies(series, astype=float):
     # Later add sortby parameter (alphabetically, etc...)
     return dataframe[dataframe.columns.tolist()[::-1]].astype(astype)        
 
+def time_to_datetime(dt_series):
+    """
+    Converts dt.time values to dt.datetime values based on the bedtime or waketime
 
+    Accepts dt.time Series
+    Returns dt.datetime Series
+
+    """
+    import pandas as pd
+    import datetime as dt
+    dt_series.reset_index(drop=True, inplace=True)
+    
+    def s_dt(dt_or_str):
+        if isinstance(dt_or_str, dt.time):
+            return dt_or_str
+        elif isinstance(dt_or_str, str):
+            return dt.datetime.strptime(dt_or_str, "%H:%M:%S")
+        else:
+            raise TypeError("Data not of string or dt.time object")
+    
+    # Insert date
+    time_day = pd.Series(["1970/01/02 " 
+                          if (dt_series.name == 'up_from_bed' or (dt_series.name == 'go_to_bed' and s_dt(dt_series[i]).hour <= 5)) 
+                          else "1970/01/01 " 
+                          for i in range(dt_series.shape[0])]).astype(str)
+
+    # Convert time values to strings
+    time_time = dt_series.astype(str)
+
+    # Concat date and time and convert to datetime object    
+    return (time_day + time_time).apply(lambda x: dt.datetime.strptime(x, "%Y/%m/%d %H:%M:%S"))
+    
 
 if __name__ == '__main__':
     
@@ -155,51 +197,31 @@ if __name__ == '__main__':
     
         
     ### Calculate the average amount of sleep for each person
-    def clean_bed_times(column, dataf=surveydata):
+    def clean_bed_times(dt_series):
         """
         Corrects incorrect AM/PM selection for given column name
         
-        Accepts string and DataFrame (default: surveydata)
+        Accepts dt.time Series
         Returns dt.time Series
         
         """
-        if column == "go_to_bed":
+        if dt_series.name == "go_to_bed":
             return pd.Series([dt.time(np.abs(time.hour - 12), time.minute, 0) 
                             if 6 < time.hour < 18 
                             else time 
-                            for time in dataf[column]])
+                            for time in dt_series])
         
-        elif column == "up_from_bed":
+        elif dt_series.name == "up_from_bed":
             return pd.Series([dt.time(np.abs(time.hour - 12), time.minute, 0) 
                             if time.hour > 18 
                             else time 
-                            for time in dataf[column]])
+                            for time in dt_series])
         
-    surveydata["go_to_bed"], surveydata["up_from_bed"] = clean_bed_times("go_to_bed"), clean_bed_times("up_from_bed")
+    surveydata["go_to_bed"], surveydata["up_from_bed"] = clean_bed_times(surveydata["go_to_bed"]), clean_bed_times(surveydata["up_from_bed"])
 
-
-    def time_to_datetime(column, dataf=surveydata):
-        """
-        Converts dt.time values to dt.datetime values based on the bedtime or waketime
-        
-        Accepts string and DataFrame (default: surveydata)
-        Returns dt.datetime Series
-
-        """
-        # Insert date
-        time_day = pd.Series(["2000/01/02 " 
-                            if (column == 'up_from_bed' or (column == 'go_to_bed' and dataf[column][i].hour < 5)) 
-                            else "2000/01/01 " 
-                            for i in range(dataf.shape[0])]).astype(str)
-        
-        # Convert time values to strings
-        time_time = dataf[column].astype(str)
-        
-        # Concat date and time and convert to datetime object    
-        return (time_day + time_time).apply(lambda x: dt.datetime.strptime(x, "%Y/%m/%d %H:%M:%S"))
 
     # Calculate and insert column into the dataset and convert timedelta to hours
-    surveydata.insert(23, 'avg_sleep_hours', (time_to_datetime('up_from_bed') - time_to_datetime('go_to_bed')).apply(lambda x: x.seconds / 3600))
+    surveydata.insert(23, 'avg_sleep_hours', (time_to_datetime(surveydata['up_from_bed']) - time_to_datetime(surveydata['go_to_bed'])).apply(lambda x: x.seconds / 3600))
 
 
 
