@@ -6,14 +6,14 @@ Created on Sun Apr 12 10:38:39 2020
 """
 import pandas
 
-def split_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"=5, drop_index:"bool"=True, output:"str"="dataframe")-> "None or pandas.DataFrame":
+def split_dataframe(df:"pandas.DataFrame, pandas.Series", sections:"int"=5, drop_index:"bool"=True, output:"str"="dataframe")-> "None or pandas.DataFrame":
     """Display a single Dataframe across multiple columns in a Jupiter Notebook.
     
     Parameters
     ----------
         df : pandas.Dataframe, pandas.Series
         
-        display_columns : int, default 5
+        sections : int, default 5
             Number of columns to display.
             
         drop_index : bool, default True
@@ -32,69 +32,15 @@ def split_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"=
     import numpy as np
     from IPython.display import display_html
     
-    if display_columns < 2:
-        raise IndexError('Number of desired columns must exceed 1')
-    
+    if sections <= 0:
+        raise ValueError('number sections must be larger than 0.')
     
     ### After fixing below, find out how to keep column names when dropindex=True
     ### if series, dont allow drop index?
     
     ### allow passing in of desired column names as an array of strings (will result
     ### in dup col names but it won't matter if its only being displayed and not used in calculations)
-    
-    #if display_columns == df.shape[0]//display_columns:
-        #raise ValueError('Number of rows cannot equal display_columns**2 for mathematical wizardry reasons') <-- not actually because of squared number
-    
-        # len(r)-1 ends up not being equal to display_columns
-        # ^ Results in inaccurate number of rows shown
-        
-        # for df.shape[0] == 49:
-        # when display_columns = 7...   actual_columns_displayed = 6
-        # when display_columns = 10...  actual_columns_displayed = 11
-        # etc...
-        # (eventually I'll come back to this to figure out why)
-        # (the likely solution is just to stick '+1' and '-1' everywhere lol)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    print("DEBUGGING TEXT:")
-    
-    #  len(r)-1 should be equal to display_columns
-    # Create range of indexes to divide DataFrame into multiple columns
-    rround = np.arange(0,df.shape[0],round(df.shape[0]/display_columns))
-    rfloor = np.arange(0,df.shape[0],df.shape[0]//display_columns)
-    
-    print(len(rround), rround, '      (round before conversion)','\n', len(rfloor),rfloor, '      (floor before conversion)',sep='')
-    
-    # Add remainder rows to last column
-    if rround[-1] != df.shape[0]-1:
-        rround = np.append(rround,[df.shape[0]-1])
-    
-    if rfloor[-1] != df.shape[0]-1:
-        rfloor = np.append(rfloor,[df.shape[0]-1])
-    
-    #r[-1] = df.shape[0] - 1
-    
-    print(len(rround),rround,'      (round after conversion)','\n', len(rfloor),rfloor,'      (floor after conversion)',sep='')
-    
-    
-    r=rround     
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
     if isinstance(df, pandas.Series):
         df = df.to_frame()
         
@@ -102,25 +48,13 @@ def split_dataframe(df:"pandas.DataFrame, pandas.Series", display_columns:"int"=
         df.reset_index(drop = True, inplace=True)
     else:
         df.reset_index(level=0, inplace=True)
-    
 
-    # Create list of DataFrames, where each DataFrame is a slice of the original DataFrame
-    num_rows = []
-    split_dataframe = []
-    for i in np.arange(len(r)-1): #probs just use range
-        
-        if i == np.arange(len(r)-1)[-1]: # display_columns-1
-            d = df[r[i]:r[i+1]+1]
-            num_rows.append(d.shape[0])
-            split_dataframe.append(d)
-        else:
-            d = df[r[i]:r[i+1]]
-            num_rows.append(d.shape[0])
-            split_dataframe.append(d)
+    df_split = np.array_split(df, sections)
+    num_rows = [column.shape[0] for column in df_split]
     
     if output == "dataframe":
         
-        alldata = [i.values.tolist() for i in split_dataframe]
+        alldata = [column.values.tolist() for column in df_split]
         
         # Add empty rows to each DataFrame until all DataFrames have the same number of rows
         for i in range(len(alldata)):
