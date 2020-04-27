@@ -35,7 +35,7 @@ def split_dataframe(df:"pandas.DataFrame, pandas.Series", sections:"int"=5, drop
     if sections <= 0:
         raise ValueError('number sections must be larger than 0.')
     
-    ### After fixing below, find out how to keep column names when dropindex=True
+    ### Find out how to keep column names when dropindex=True
     ### if series, dont allow drop index?
     
     ### allow passing in of desired column names as an array of strings (will result
