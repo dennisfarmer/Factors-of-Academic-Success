@@ -5,7 +5,7 @@ Dennis Farmer
 Factors of Academic Success
 Data Cleaning, Analysis, and Visualization Project
 
-Part 1: Basic Data Cleaning and Transformation
+Part I: Data Cleaning
 
 """
 def load_datas(path:'path/to/folder_name'='.', ftype='excel'):
