@@ -1,9 +1,10 @@
 # Factors of Academic Success: Project Overview
 
+<!---
 
 [comment] # (* point 1 )
 
-[comment] # (* point 2
+[comment] # (* point 2 )
 
 [comment] # (## Code Requirements)
 
@@ -11,4 +12,4 @@
 
 [comment] # (**Packages:**... ... ...)
 
-
+--->
