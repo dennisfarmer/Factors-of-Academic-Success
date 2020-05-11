@@ -1,9 +1,14 @@
 # Factors of Academic Success: Project Overview
-* point 1 (what I did)
-* point 2
 
-## Code Requirements
-**Python Version:** 3.7
-**Packages:**... ... ...
+
+[comment] # (* point 1 )
+
+[comment] # (* point 2
+
+[comment] # (## Code Requirements)
+
+[comment] # (**Python Version:** 3.7)
+
+[comment] # (**Packages:**... ... ...)
 
 
