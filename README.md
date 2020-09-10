@@ -2,6 +2,7 @@
 
 <!--- Basic Outline Format Copied from Ken Jee -->
 <!--- https://github.com/PlayingNumbers/ds_salary_proj/blob/master/README.md -->
+=======
 
 - Surveyed 49 students about their school lives and personal lives
 - Cleaned resulting survey data
@@ -9,6 +10,7 @@
 - Created webpage detailing findings, with visual plots to suppliment analysis overview
 
 ## Code Requirements
+=======
 
 **Python Version:** 3.8
 
@@ -79,3 +81,4 @@ Share Posts Often --- 3.333
 - Included a <a target="_blank" href="https://dennisfarmer.github.io/factors_of_academic_success/#part-iv-short-summary">short summary</a> of the analysis results to quickly summarize the conclusions I came to.
 
 **Blog Post:** https://dennisfarmer.github.io/factors_of_academic_success/
+=======
