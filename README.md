@@ -3,7 +3,7 @@
 <!--- Basic Outline Format Copied from Ken Jee -->
 <!--- https://github.com/PlayingNumbers/ds_salary_proj/blob/master/README.md -->
 
-[Web-Friendly Version of Data Analysis Notebook](https://nbviewer.jupyter.org/github/dennisfarmer/Factors-of-Academic-Success/blob/master/eda.ipynb)
+<a href="https://nbviewer.jupyter.org/github/dennisfarmer/Factors-of-Academic-Success/blob/master/eda.ipynb" target="_blank">Web-Friendly Version of Data Analysis Notebook</a>
 
 - Surveyed 49 students about their school lives and personal lives
 - Cleaned resulting survey data
